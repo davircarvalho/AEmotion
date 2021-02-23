@@ -18,7 +18,7 @@ from datetime import datetime as dtime
 import paho.mqtt.client as mqtt #import the client1
 import time
 
-
+# %% Initialize MQTT
 def on_message(client, userdata, message):
     print("message received " ,str(message.payload.decode("utf-8")))
     print("message topic=",message.topic)
