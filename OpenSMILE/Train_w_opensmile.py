@@ -65,7 +65,7 @@ model.summary()
 cnnhistory = model.fit(x_train, y_train,
                         batch_size = 32,
                         validation_data=(x_test, y_test),
-                        epochs = 50,
+                        epochs = 30,
                         verbose = 1)
 
 
