@@ -185,6 +185,8 @@ class TCN(Layer):
             dropout_rate: Float between 0 and 1. Fraction of the input units to drop.
             kernel_initializer: Initializer for the kernel weights matrix (Conv1D).
             use_batch_norm: Whether to use batch normalization in the residual layers or not.
+            use_layer_norm: Whether to use layer normalization in the residual layers or not.
+            use_weight_norm: Whether to use weight normalization in the residual layers or not.
             kwargs: Any other arguments for configuring parent class Layer. For example "name=str", Name of the model.
                     Use unique names when using multiple TCN.
 
@@ -243,9 +245,7 @@ class TCN(Layer):
 
     @property
     def receptive_field(self):
-        assert_msg = 'The receptive field formula works only with power of two dilations.'
-        assert all([is_power_of_two(i) for i in self.dilations]), assert_msg
-        return self.kernel_size * self.nb_stacks * self.dilations[-1]
+        return 1 + self.nb_stacks * sum([d * self.kernel_size for d in self.dilations])
 
     def build(self, input_shape):
 

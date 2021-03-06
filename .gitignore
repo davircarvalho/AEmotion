@@ -9,5 +9,7 @@ Haytham_Fayek_Guide_filterbanks_mel.ipynb
 *.wav
 *.pdf
 dataset_smile_it.pckl
+dataset_smile_it_en.pckl
 dataset_it.pckl
+dataset_it_en.pckl
 

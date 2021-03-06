@@ -14,7 +14,7 @@ import pickle
 
 
 # %% Load dataset
-with open('../Network/dataset_it.pckl', 'rb') as f:
+with open('../Network/dataset_it_en.pckl', 'rb') as f:
     [X, y] = pickle.load(f)
          
 
@@ -34,6 +34,6 @@ for k in range(len(X)):
 
 
 # %% Save smile dataset
-with open('../Network/dataset_smile_it.pckl', 'wb') as f:
+with open('../Network/dataset_smile_it_en.pckl', 'wb') as f:
     pickle.dump([X_smile, y], f)
     

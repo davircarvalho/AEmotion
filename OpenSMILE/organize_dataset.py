@@ -8,15 +8,15 @@ DEMoS and EmoFilm datasets feature extraction
 """
 
 # %% Imports
-from features_extraction import load_data
+from Feature_Extraction import load_data
 import os 
 import pickle
 import numpy as np
 
 # %% Categorizar dados em pastas
-path = 'dataset/DEMoS/DEMOS/'
+path = '../dataset/DEMoS/DEMOS/'
 # path = 'dataset/EmoFilm/wav_corpus/'
-path_out = 'dataset/Italiano'
+path_out = '../dataset/Italiano'
 for subdir, dirs, files in os.walk(path):
     for file in files:
         emotion = file[8:11] # if DEMoS
@@ -45,15 +45,14 @@ for subdir, dirs, files in os.walk(path):
         os.replace(path + file, path_paste + file)
         
         
-# %% Preparar MFCCs
-path_out = 'dataset/Italiano'
-lst = load_data(path_out)
+# %% Prepare dataset
+path = '../dataset/ITA_ENG'
+lst = load_data(path, sampling_rate=44100, duration=3, mfcc=False)
 
 # Array conversion
 X, y = zip(*lst)
 X, y = np.asarray(X), np.asarray(y)
-f = open('Network/features_it.pckl', 'wb')
-pickle.dump([X, y], f)
-f.close()
+with open('../Network/dataset_it_en.pckl', 'wb') as f:
+    pickle.dump([X, y], f)
 print("All done!")
 # %%

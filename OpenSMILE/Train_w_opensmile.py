@@ -20,7 +20,7 @@ import seaborn as sb
 
 
 # %% Load dataset 
-with open('../Network/dataset_smile_it.pckl', 'rb') as f:
+with open('../Network/dataset_smile_it_en.pckl', 'rb') as f:
     [X, y] = pickle.load(f)
     
     
@@ -60,6 +60,8 @@ model = compiled_tcn(return_sequences=False,
                     use_skip_connections=True,
                     opt='adam')
 model.summary()
+# 0print("receptiv field: ", model.receptive_field())
+
 
 # %% Train
 cnnhistory = model.fit(x_train, y_train,
@@ -73,10 +75,10 @@ cnnhistory = model.fit(x_train, y_train,
 # %% Save it all
 # get model as json string and save to file
 model_as_json = model.to_json()
-with open('../Network/model_smile_it.json', "w") as json_file:
+with open('../Network/model_smile_it_en.json', "w") as json_file:
     json_file.write(model_as_json)
     # save weights to file (for this format, need h5py installed)
-    model.save_weights('../Network/weights_smile_it.h5')
+    model.save_weights('../Network/weights_smile_it_en.h5')
 
 
 
