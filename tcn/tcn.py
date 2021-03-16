@@ -2,7 +2,7 @@ import inspect
 from typing import List
 
 from tensorflow.keras import backend as K, Model, Input, optimizers
-from tensorflow.keras import layers
+from tensorflow.keras import layers, regularizers
 from tensorflow.keras.layers import Activation, SpatialDropout1D, Lambda
 from tensorflow.keras.layers import Layer, Conv1D, Dense, BatchNormalization, LayerNormalization
 
@@ -425,7 +425,7 @@ def compiled_tcn(num_feat,  # type: int
 
     if not regression:
         # classification
-        x = Dense(num_classes)(x)
+        x = Dense(num_classes, kernel_regularizer=regularizers.l2(0.01))(x)
         x = Activation('softmax')(x)
         output_layer = x
         model = Model(input_layer, output_layer)

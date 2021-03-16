@@ -8,8 +8,11 @@ import pickle
 import librosa
 import keract
 
-from tensorflow.keras.models import model_from_json
+import sys 
+sys.path.append('..')
 from tcn import TCN
+
+from tensorflow.keras.models import model_from_json
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 from IPython.display import clear_output
@@ -111,14 +114,14 @@ while True:
     print(labels[predi[0]] + "  --  (raw data peak: " + str(max(data))+")")
     
     # GET ACTIVATIONS
-    layername = 'activation_1' 
+    layername = 'activation_3' 
     l_weights = keract.get_activations(model, x_infer, layer_names=layername)
     w_values = np.squeeze(l_weights[layername])
     
     # SEND TO MQTT BrOKER
-    client.publish('hiper/labinter99', labels[predi[0]])
+    client.publish('hiper/labinter99_ita', labels[predi[0]])
     for k in range(len(labels)):
-        topic_pub = "hiper/labinter_"+labels[k]
+        topic_pub = "hiper/labinter_ita_"+labels[k]
         # client.subscribe(topic_pub)
         client.publish(topic_pub, str(w_values[k]))
         
@@ -127,15 +130,15 @@ while True:
         #     mqtt_client.publish_single(float(w_values[k]), topic=labels[k])
 
         # plot
-        clear_output(wait=True)
-        plt.plot(w_values, 'b-')
-        plt.title(labels[predi[0]])
-        plt.yticks(ticks=np.arange(0,1.1,0.1))
-        plt.xticks(ticks=np.arange(0,7), labels=labels)
-        plt.xlabel('Emotion')
-        plt.ylabel('NN certainty')
-        plt.grid()
-        plt.show()  
+        # clear_output(wait=True)
+        # plt.plot(w_values, 'b-')
+        # plt.title(labels[predi[0]])
+        # plt.yticks(ticks=np.arange(0,1.1,0.1))
+        # plt.xticks(ticks=np.arange(0,7), labels=labels)
+        # plt.xlabel('Emotion')
+        # plt.ylabel('NN certainty')
+        # plt.grid()
+        # plt.show()  
 
 
 # %% Plot history 

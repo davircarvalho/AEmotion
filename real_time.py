@@ -51,17 +51,17 @@ for i in range(0, numdevices):
 
 
 #  Time streaming #############################################
-RATE = 44100 # Sample rate
+RATE = 48000 # Sample rate
 nn_time = 3 # signal length send to the network
 CHUNK = round(RATE*nn_time) # Frame size
 
 print('janela de análise é de: {0} segundos'.format(CHUNK/RATE))
 #input stream setup
 # pyaudio.paInt16 : representa resolução em 16bit 
-stream=p.open(format = pyaudio.paInt16,
+stream=p.open(format = pyaudio.paFloat32,
                        rate=RATE,
                        channels=1, 
-                       input_device_index = 1,
+                       input_device_index = 5,
                        input=True,  
                        frames_per_buffer=CHUNK)
 
@@ -71,7 +71,7 @@ labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprised']
 history_pred = []
 hist_time = []
 while True:
-    data = np.fromstring(stream.read(CHUNK),dtype=np.int16)
+    data = np.frombuffer(stream.read(CHUNK),dtype=np.float32)
     data = np.nan_to_num(np.array(data))
     x_infer = input_prep(data, RATE, mean_in, std_in)
     pred = np.round(model.predict(x_infer, verbose=0))
@@ -79,7 +79,7 @@ while True:
         predi = pred.argmax(axis=1)
         history_pred = np.append(history_pred, predi[0])
         # hist_time = np.append(hist_time, dtime.now().strftime('%H:%M:%S'))
-        # print(labels[predi[0]] + "  --  (raw data peak: " + str(max(data))+")")
+        print(labels[predi[0]] + "  --  (raw data peak: " + str(max(data))+")")
         
         # GET ACTIVATIONS
         layername = 'activation' 
@@ -91,15 +91,15 @@ while True:
         #     mqtt_client.publish_single(float(w_values[k]), topic=labels[k])
 
         # plot
-        clear_output(wait=True)
-        plt.plot(w_values, 'b-')
-        plt.title(labels[predi[0]])
-        plt.yticks(ticks=np.arange(0,1.1,0.1))
-        plt.xticks(ticks=np.arange(0,7), labels=labels)
-        plt.xlabel('Emotion')
-        plt.ylabel('NN certainty')
-        plt.grid()
-        plt.show()  
+        # clear_output(wait=True)
+        # plt.plot(w_values, 'b-')
+        # plt.title(labels[predi[0]])
+        # plt.yticks(ticks=np.arange(0,1.1,0.1))
+        # plt.xticks(ticks=np.arange(0,7), labels=labels)
+        # plt.xlabel('Emotion')
+        # plt.ylabel('NN certainty')
+        # plt.grid()
+        # plt.show()  
 
 
 # %% Plot history 
@@ -116,4 +116,3 @@ plt.title('AEmotion classification')
 plt.grid()
 plt.show()
 h.savefig("Network/hist.pdf", bbox_inches='tight')
-
