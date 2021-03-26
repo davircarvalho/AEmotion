@@ -2,10 +2,8 @@
 Real time AEmotion
 """
 # %% Import libs
-import pyaudio
+# import pyaudio
 import numpy as np
-import pickle
-import librosa
 import keract
 
 import sys 
@@ -15,13 +13,9 @@ from tcn import TCN
 from tensorflow.keras.models import model_from_json
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
-from IPython.display import clear_output
-from datetime import datetime as dtime
 import opensmile
-
-
+import pyaudio
 import paho.mqtt.client as mqtt #import the client1
-import time
 
 
 # %% Initialize MQTT
@@ -41,7 +35,7 @@ broker_port = 2494
 keepalive = 60
 
 print("creating new instance")
-client = mqtt.Client("P1") #create new instance
+client = mqtt.Client("Labinter02") #create new instance
 client.on_message=on_message #attach function to callback
 # client.on_log=on_log
 client.username_pw_set("participants", "prp1nterac")
@@ -105,23 +99,23 @@ labels = ['Guilt', 'Disgust', 'Happy', 'Neutral', 'Anger', 'Surprise', 'Sad']
 history_pred = []
 hist_time = []
 while True:
-    data = np.frombuffer(stream.read(CHUNK),dtype=np.float32)
+    data = np.frombuffer(stream.read(CHUNK), dtype=np.float32)
     x_infer = input_prep(data, smile)
     pred = model.predict(x_infer)
     predi = pred.argmax(axis=1)
-    history_pred = np.append(history_pred, predi[0])
+    # history_pred = np.append(history_pred, predi[0])
     # hist_time = np.append(hist_time, dtime.now().strftime('%H:%M:%S'))
     print(labels[predi[0]] + "  --  (raw data peak: " + str(max(data))+")")
     
     # GET ACTIVATIONS
-    layername = 'activation_3' 
+    layername = 'activation' 
     l_weights = keract.get_activations(model, x_infer, layer_names=layername)
     w_values = np.squeeze(l_weights[layername])
     
     # SEND TO MQTT BrOKER
-    client.publish('hiper/labinter99_ita', labels[predi[0]])
+    client.publish('hiper/labinter99', labels[predi[0]])
     for k in range(len(labels)):
-        topic_pub = "hiper/labinter_ita_"+labels[k]
+        topic_pub = "hiper/labinter_ita_"+labels[k] 
         # client.subscribe(topic_pub)
         client.publish(topic_pub, str(w_values[k]))
         
@@ -149,7 +143,7 @@ plt.yticks(range(0,7) , labels=labels)
 # plt.xticks(range(0,len(history_pred)) , labels=hist_time, rotation=90)
 
 
-plt.xlabel('Time (each dot represents a ' +str(nn_time)+ 's iteration)')
+plt.xlabel('Time (each dot represents a ' + str(nn_time)+ 's iteration)')
 plt.ylabel('Emotion')
 plt.title('AEmotion classification')
 plt.grid()

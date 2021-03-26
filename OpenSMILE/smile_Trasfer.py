@@ -6,7 +6,9 @@ Created on Mon Mar  1 16:48:20 2021
 '''
 
 # %% Import libs
-import sys 
+import sys
+
+from sklearn import metrics 
 sys.path.append('..')
 
 from tcn import TCN, compiled_tcn
@@ -20,12 +22,12 @@ from sklearn.metrics import confusion_matrix
 # import matplotlib.pyplot as plt
 from tensorflow.keras.models import model_from_json
 # import seaborn as sb
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.callbacks import EarlyStopping
 
 
 
 # %% Load dataset 
-with open('../Network/dataset_smile_rav_tess_16khz.pckl', 'rb') as f:
+with open('../Network/dataset_smile_ptbr_16khz.pckl', 'rb') as f:
     [X, y] = pickle.load(f)
     
     
@@ -53,32 +55,44 @@ x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 
 
+
+
 # %% Create TCN
-model = compiled_tcn(return_sequences=False,
-                    num_feat=x_train.shape[2],
-                    num_classes=len(np.unique(y_train)),
-                    nb_filters=65,
-                    kernel_size=9,
-                    dilations=[2 ** i for i in range(7)], 
-                    nb_stacks=1,
-                    dropout_rate=0.2,
-                    use_weight_norm=True,
-                    max_len=x_train[0:1].shape[1],
-                    use_skip_connections=True,
-                    opt='adam',
-                    lr=0.002226)
+## Reload saved model 
+# load model from file
+with open('../Network/model_smile_it.json', 'r') as json_file:
+    loaded_json = json_file.read()
+    model = model_from_json(loaded_json, custom_objects={'TCN': TCN})
+    # restore weights
+    model.load_weights('../Network/weights_smile_it.h5')
+
 model.summary()
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# return_sequences=False,
+# num_feat=x_train.shape[2],
+# num_classes=len(np.unique(y_train)),
+# nb_filters=65,
+# kernel_size=9,
+# dilations=[2 ** i for i in range(7)], 
+# nb_stacks=1,
+# dropout_rate=0.2,
+# use_weight_norm=True,
+# max_len=x_train[0:1].shape[1],
+# use_skip_connections=True,
+# opt='adam',
+# lr=0.002226
 
 
 # %% Train
-early_stop = EarlyStopping(monitor="val_accuracy", patience=6)
-reduce_lr = ReduceLROnPlateau(patience=4, monitor='val_accuracy')
+early_stop = EarlyStopping(monitor="val_accuracy", patience=4)
+
 cnnhistory = model.fit(x_train, y_train,
                         batch_size = 38,
                         validation_data=(x_test, y_test),
                         epochs = 70,
                         verbose = 1,
-                        callbacks=[early_stop, reduce_lr])
+                        callbacks=early_stop)
 
 
 
