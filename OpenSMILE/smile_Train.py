@@ -16,16 +16,18 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import confusion_matrix
-# import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt
 from tensorflow.keras.models import model_from_json
-# import seaborn as sb
+import seaborn as sb
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
+# model_name = 'rav_tess_16khz'
+model_name = 'it_16khz'
 
 
 # %% Load dataset 
-with open('../Network/dataset_smile_rav_tess_16khz.pckl', 'rb') as f:
+with open('../Network/dataset_smile_' + model_name + '.pckl', 'rb') as f:
     [X, y] = pickle.load(f)
     
     
@@ -71,8 +73,8 @@ model.summary()
 
 
 # %% Train
-early_stop = EarlyStopping(monitor="val_accuracy", patience=6)
-reduce_lr = ReduceLROnPlateau(patience=4, monitor='val_accuracy')
+early_stop = EarlyStopping(monitor="val_accuracy", patience=8)
+reduce_lr = ReduceLROnPlateau(patience=6, monitor='val_accuracy')
 cnnhistory = model.fit(x_train, y_train,
                         batch_size = 38,
                         validation_data=(x_test, y_test),
@@ -85,10 +87,10 @@ cnnhistory = model.fit(x_train, y_train,
 # %% Save it all
 # get model as json string and save to file
 model_as_json = model.to_json()
-with open('../Network/model_smile_rav_tess_16khz.json', 'w') as json_file:
+with open('../Network/model_smile_' +model_name+ '.json', 'w') as json_file:
     json_file.write(model_as_json)
     # save weights to file (for this format, need h5py installed)
-    model.save_weights('../Network/weights_smile_rav_tess_16khz.h5')
+    model.save_weights('../Network/weights_smile_' +model_name+ '.h5')
 
 
 
@@ -104,7 +106,7 @@ with open('../Network/model_smile_rav_tess_16khz.json', 'w') as json_file:
 # plt.legend(['Train', 'Test'], loc='upper right')
 # plt.grid()
 # plt.show()
-# h.savefig("../Network/Loss.pdf", bbox_inches='tight')
+# h.savefig('../Network/Loss' +model_name+ '.pdf', bbox_inches='tight')
 
 
 # h = plt.figure()
@@ -116,33 +118,43 @@ with open('../Network/model_smile_rav_tess_16khz.json', 'w') as json_file:
 # plt.legend(['Train', 'Test'], loc='lower right')
 # plt.grid()
 # plt.show()
-# h.savefig("../Network/Accuracy.pdf", bbox_inches='tight')
+# h.savefig('../Network/Accuracy' +model_name+ '.pdf', bbox_inches='tight')
 
 
 
 
-# # %% reload saved model 
-# # load model from file
-# with open('../Network/model_smile_it.json', 'r') as json_file:
-#     loaded_json = json_file.read()
-#     model = model_from_json(loaded_json, custom_objects={'TCN': TCN})
-#     # restore weights
-#     model.load_weights('../Network/weights_smile_it.h5')
+# %% load model from file
+with open('../Network/model_smile_' +model_name+ '.json', 'r') as json_file:
+    loaded_json = json_file.read()
+    model = model_from_json(loaded_json, custom_objects={'TCN': TCN})
+    # restore weights
+    model.load_weights('../Network/weights_smile_' +model_name+ '.h5')
 
 
 
-# # %% Confusion Matrix
-# lb = LabelEncoder()
-# pred = model.predict(x_test, verbose=1)
-# pred = pred.squeeze().argmax(axis=1)
-# new_y_test = y_test.astype(int)
+# %% Confusion Matrix
+lb = LabelEncoder()
+pred = model.predict(x_test, verbose=1)
+pred = pred.squeeze().argmax(axis=1)
+new_y_test = y_test.astype(int)
 
-# mtx = confusion_matrix(new_y_test, pred)
+mtx = confusion_matrix(new_y_test, pred)
+# DEMoS labels
 # labels = ['Guilt', 'Disgust', 'Happy', 'Fear', 'Anger', 'Surprise', 'Sad']
-# h = plt.figure()
-# sb.heatmap(mtx, annot = True, fmt ='d',
-#            yticklabels=labels,
-#            xticklabels=labels,
-#            cbar=False)
-# plt.title('Confusion matrix')
-# h.savefig("../Network/Confusion.pdf", bbox_inches='tight')
+# RAVDESS+TESS labels
+labels = ['Neutral', 'Happy', 'Sad', 'Anger', 'Fear', 'Disgust', 'Surprise']
+
+h = plt.figure()
+sb.heatmap(mtx, annot = True, fmt ='d',
+           yticklabels=labels,
+           xticklabels=labels,
+           cbar=False)
+plt.title('Confusion matrix')
+h.savefig('../Network/Confusion' +model_name+ '.pdf', bbox_inches='tight')
+
+# %%
+pred = model.predict(x_test)
+y_pred = pred.squeeze().argmax(axis=1)
+
+print(classification_report(y_test, y_pred))
+# %%

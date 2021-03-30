@@ -60,11 +60,11 @@ x_test = x_test.astype('float32')
 # %% Create TCN
 ## Reload saved model 
 # load model from file
-with open('../Network/model_smile_it.json', 'r') as json_file:
+with open('Network/model_smile_it.json', 'r') as json_file:
     loaded_json = json_file.read()
     model = model_from_json(loaded_json, custom_objects={'TCN': TCN})
     # restore weights
-    model.load_weights('../Network/weights_smile_it.h5')
+    model.load_weights('Network/weights_smile_it.h5')
 
 model.summary()
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
